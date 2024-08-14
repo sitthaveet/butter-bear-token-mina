@@ -13,8 +13,19 @@ dotenv.config();
 
 class MyToken extends FungibleToken {}
 
+// generate token key pair
 const { privateKey: tokenKey, publicKey: tokenAddress } =
   PrivateKey.randomKeypair();
+
+console.log(`Token Private Key: ${tokenKey.toBase58()}`);
+console.log(`Token Public Key: ${tokenAddress.toBase58()}`);
+
+// generate admin key pair
+const {privateKey: adminKey, publicKey: adminAddress} =
+  PrivateKey.randomKeypair();
+
+console.log(`Admin Private Key: ${adminKey.toBase58()}`);
+console.log(`Admin Public Key: ${adminAddress.toBase58()}`);
 
 // Devnet network
 const Network = Mina.Network('https://api.minascan.io/node/devnet/v1/graphql');
@@ -29,21 +40,17 @@ await MyToken.compile();
 const deployerKey = PrivateKey.fromBase58(
   process.env.DEPLOYER_PRIVATE_KEY || ''
 );
-const adminKey = PrivateKey.fromBase58(
-  process.env.ADMIN_PRIVATE_KEY || ''
-);
 const deployerAddress = PublicKey.fromPrivateKey(deployerKey);
-const adminAddress = PublicKey.fromPrivateKey(adminKey);
 
 // Create a new instance of the contract
 const token = new MyToken(tokenAddress);
 const fungibleTokenAdmin = new FungibleTokenAdmin(adminAddress);
 
-console.log('Deployer address:', deployerAddress.toString());
-console.log('Admin address:', adminAddress.toString());
+console.log('Deployer address:', deployerAddress.toBase58());
+console.log('Admin address:', adminAddress.toBase58());
 
 // token details
-const symbol = 'BTB';
+const symbol = 'BUTB';
 const src =
   'https://github.com/MinaFoundation/mina-fungible-token/blob/main/FungibleToken.ts';
 
@@ -63,7 +70,7 @@ try {
         symbol,
         src,
       });
-      await token.initialize(adminAddress, UInt8.from(6), Bool(false));
+      await token.initialize(adminAddress, UInt8.from(9), Bool(false));
     }
   );
   await tx.prove();
@@ -74,7 +81,7 @@ try {
   console.log(
     `See transaction at https://minascan.io/devnet/tx/${txResult.hash}`
   );
-  console.log('Token successfully deployed to:', tokenAddress.toString());
+  console.log('Token successfully deployed to:', tokenAddress.toBase58());
 } catch (error) {
   console.error('Error deploying token:', error);
 }
